@@ -2,12 +2,34 @@ from PIL import Image, ImageSequence
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import os
+
+
+def load_series(path, return_frames=False):
+    i = 0
+    timestamps = []
+    frames = []
+    sizes = []
+    path_core = path.split('_')[0] + "_" + path.split('_')[1]
+    print(path_core)
+    while True:
+        path = f"{path_core}_{i}.tif"
+        i += 1
+        if os.path.exists(path):
+            timestamps_i, frames_i, sizes_i = open_tiff(path, return_frames)
+            timestamps += timestamps_i
+            frames += frames_i
+            sizes += sizes_i
+        else:
+            break
+    return timestamps, frames, sizes
 
 
 def open_tiff(path, return_frames=False):
     tiff_img = Image.open(path)
     frames = []
     timestamps = []
+    sizes = []
     for i, page in enumerate(ImageSequence.Iterator(tiff_img)):
         if return_frames:
             im = plt.imshow(page, cmap="gray")
@@ -17,8 +39,10 @@ def open_tiff(path, return_frames=False):
         # two's complement of the timestamp entries to get a 64bit value in nano seconds
         timestamp = np.int64((np.int64(page.tag_v2[32781]) << 32) | page.tag_v2[32782])
         timestamps.append(timestamp)
+        sizes.append(page.tag_v2[256] * page.tag_v2[257])
         print(f"reading {i} with size {page.tag_v2[256]} x {page.tag_v2[257]}")
-    return timestamps, frames
+
+    return timestamps, frames, sizes
 
 
 def get_frame_rate(timestamps):
@@ -35,7 +59,6 @@ def plot_framedrops(timestamps, ax, color="black"):
     ax.set_ylabel(r"interval $\Delta t$")
 
 
-
 def plot_frame_hist(timestamps, ax):
     intervals = np.diff(timestamps) / 1000 / 1000 / 1000
     intervals = np.round(intervals, 4)
@@ -46,7 +69,6 @@ def plot_frame_hist(timestamps, ax):
     ax.set_ylabel("frame number")
     print(bins)
     # ax.set_xticks([min(bins), max(bins)], ["frame on time", "frame delayed"])
-
 
 
 if __name__ == "__main__":
