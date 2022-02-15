@@ -4,28 +4,55 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-def open_tiff(path, return_ims=False):
+def open_tiff(path, return_frames=False):
     tiff_img = Image.open(path)
-    ims = []
+    frames = []
     timestamps = []
     for i, page in enumerate(ImageSequence.Iterator(tiff_img)):
-        if return_ims:
+        if return_frames:
             im = plt.imshow(page, cmap="gray")
-            ims.append([im])
+            frames.append([im])
+        else:
+            frames.append(None)
         # two's complement of the timestamp entries to get a 64bit value in nano seconds
         timestamp = np.int64((np.int64(page.tag_v2[32781]) << 32) | page.tag_v2[32782])
         timestamps.append(timestamp)
-        print(f"reading {i}")
-    if return_ims:
-        return timestamps, ims
-    else:
-        return timestamps
+        print(f"reading {i} with size {page.tag_v2[256]} x {page.tag_v2[257]}")
+    return timestamps, frames
+
+
+def get_frame_rate(timestamps):
+    interval = np.diff(timestamps).min() / 1000 / 1000 / 1000
+    return 1 / interval
+
+
+def plot_framedrops(timestamps, ax, color="black"):
+    intervals = np.diff(timestamps) / 1000 / 1000 / 1000
+    intervals = np.round(intervals, 4)
+    frames = range(len(intervals))
+    ax.step(frames, intervals, color=color, where='pre')
+    ax.set_xlabel("frame")
+    ax.set_ylabel(r"interval $\Delta t$")
+
+
+
+def plot_frame_hist(timestamps, ax):
+    intervals = np.diff(timestamps) / 1000 / 1000 / 1000
+    intervals = np.round(intervals, 4)
+    n, bins, patches = ax.hist(intervals, color="black")
+    total_frames = np.sum(n) + np.sum(n[1:])
+    print(f"frame drop: {np.sum(n[1:]) / total_frames * 100:.1f}%")
+    ax.set_title(f"total frames: {len(intervals)}, dropped {np.sum(n[1:]) / total_frames * 100:.1f}%")
+    ax.set_ylabel("frame number")
+    print(bins)
+    # ax.set_xticks([min(bins), max(bins)], ["frame on time", "frame delayed"])
+
 
 
 if __name__ == "__main__":
     # fig = plt.figure()
 
-    timestamps, ims = open_tiff("data/image_2022-02-04T14-46-57.899_7.tif", True)
+    timestamps, frames = open_tiff("data/image_2022-02-14T11-35-14.018_0.tif", True)
 
     interval = np.diff(timestamps).mean() / 1000 / 1000 / 1000
     intervals = np.diff(timestamps) / 1000 / 1000 / 1000
@@ -52,7 +79,7 @@ if __name__ == "__main__":
     interval = 50
     fig = plt.figure()
 
-    ani = animation.ArtistAnimation(fig, ims, interval=interval, blit=True, repeat_delay=1000)
+    ani = animation.ArtistAnimation(fig, frames, interval=interval, blit=True, repeat_delay=1000)
     # save animation
 
     # needs ffmpeg to be installed
