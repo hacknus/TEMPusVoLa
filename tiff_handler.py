@@ -16,6 +16,7 @@ def load_series(path, ax, return_frames=False):
     while True:
         path = f"{path_core}_{i}.tif"
         i += 1
+        print(f"opening {path=}")
         if os.path.exists(path):
             timestamps_i, frames_i, x_i, y_i = open_tiff(path, ax, return_frames)
             timestamps += timestamps_i
@@ -76,17 +77,20 @@ def plot_frame_hist(timestamps, ax):
 
 
 if __name__ == "__main__":
-    fig = plt.figure(frameon=False)
     dpi = 1
-    ax = plt.Axes(fig, [0., 0., 1., 1.])
-    ax.set_axis_off()
-    fig.add_axes(ax)
+    fig, ax = plt.subplots()
 
-    timestamps, frames, _, _ = open_tiff("data/image_2022-02-15T15-37-36.853_0.tif", ax, True)
+    path = "/Volumes/NO NAME/image_2022-02-17T14-55-13.447_0.tif"
+    timestamps, frames, _, _ = load_series(path, ax, False)
 
     interval = np.diff(timestamps).mean() / 1000 / 1000 / 1000
     intervals = np.diff(timestamps) / 1000 / 1000 / 1000
+    frame_rate = get_frame_rate(timestamps)
+
     print(f"detected a framerate of {1 / interval:.2f} fps")
     print(f"detected an interval of {1000 * interval:.2f} ms")
-    num_frames = range(len(intervals))
+    print(f"{frame_rate=:.2f} s, time: {(len(timestamps) - 1) / frame_rate:.2f} s")
 
+    # plot_framedrops(timestamps, ax)
+    plot_frame_hist(timestamps, ax)
+    plt.show()

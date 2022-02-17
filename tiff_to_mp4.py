@@ -27,10 +27,10 @@ if __name__ == "__main__":
     ax.set_axis_off()
     fig.add_axes(ax)
 
-    path = "data/image_2022-02-15T15-36-26.04_0.tif"
+    path = "data/old/image_2022-02-15T15-36-26.04_0.tif"
     # path = "data/image_2022-02-15T15-37-09.663_0.tif"
     # path = "data/image_2022-02-15T15-37-36.853_0.tif"
-    path = "data/image_2022-02-17T12-13-05.09_0.tif"
+    path = "data/old/image_2022-02-17T12-13-05.09_0.tif"
     timestamps, frames, x, y = load_series(path, ax, True)
     frame_rate = get_frame_rate(timestamps)
     timestamps, frames = fill_dropped_frames(timestamps, frames)
