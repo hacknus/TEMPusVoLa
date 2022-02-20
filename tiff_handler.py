@@ -40,7 +40,7 @@ def open_tiff(path, ax, return_frames=False):
             frames.append([im])
         else:
             frames.append(None)
-        # two's complement of the timestamp entries to get a 64bit value in nano seconds
+        # the timestamp entries to get a 64bit value in nano seconds
         timestamp = np.int64((np.int64(page.tag_v2[32781]) << 32) | page.tag_v2[32782])
         timestamps.append(timestamp)
         x.append(page.tag_v2[256])
