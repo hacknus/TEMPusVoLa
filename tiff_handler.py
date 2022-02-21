@@ -16,8 +16,8 @@ def load_series(path, ax=None, return_frames=False):
     while True:
         path = f"{path_core}_{i}.tif"
         i += 1
-        print(f"opening {path=}")
         if os.path.exists(path):
+            print(f"opening {path=}")
             timestamps_i, frames_i, x_i, y_i = open_tiff(path, ax, return_frames)
             timestamps += timestamps_i
             frames += frames_i
@@ -40,7 +40,7 @@ def open_tiff(path, ax=None, return_frames=False):
                 im = ax.imshow(page, cmap="gray")
                 frames.append([im])
             else:
-                frames.append(page)
+                frames.append(page.copy())
         else:
             frames.append(None)
         # the timestamp entries to get a 64bit value in nano seconds
@@ -48,6 +48,7 @@ def open_tiff(path, ax=None, return_frames=False):
         timestamps.append(timestamp)
         x.append(page.tag_v2[256])
         y.append(page.tag_v2[257])
+
         # print(f"reading {i} with size {page.tag_v2[256]} x {page.tag_v2[257]}")
 
     return timestamps, frames, x, y
