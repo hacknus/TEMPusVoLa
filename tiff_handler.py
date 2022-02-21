@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 import os
 
 
-def load_series(path, ax, return_frames=False):
+def load_series(path, ax=None, return_frames=False):
     i = 0
     timestamps = []
     frames = []
@@ -28,7 +28,7 @@ def load_series(path, ax, return_frames=False):
     return timestamps, frames, x, y
 
 
-def open_tiff(path, ax, return_frames=False):
+def open_tiff(path, ax=None, return_frames=False):
     tiff_img = Image.open(path)
     frames = []
     timestamps = []
@@ -36,8 +36,11 @@ def open_tiff(path, ax, return_frames=False):
     y = []
     for i, page in enumerate(ImageSequence.Iterator(tiff_img)):
         if return_frames:
-            im = ax.imshow(page, cmap="gray")
-            frames.append([im])
+            if ax:
+                im = ax.imshow(page, cmap="gray")
+                frames.append([im])
+            else:
+                frames.append(page)
         else:
             frames.append(None)
         # the timestamp entries to get a 64bit value in nano seconds
