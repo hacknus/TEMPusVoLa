@@ -11,6 +11,7 @@ def load_series(path, ax=None, return_frames=False):
     frames = []
     x = []
     y = []
+    size = 0
     path_core = path.split('_')[0] + "_" + path.split('_')[1]
     print(path_core)
     while True:
@@ -23,9 +24,10 @@ def load_series(path, ax=None, return_frames=False):
             frames += frames_i
             x += x_i
             y += y_i
+            size += os.path.getsize(path)
         else:
             break
-    return timestamps, frames, x, y
+    return timestamps, frames, x, y, size
 
 
 def open_tiff(path, ax=None, return_frames=False):
@@ -85,7 +87,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
 
     path = "/Volumes/NO NAME/image_2022-02-17T14-55-13.447_0.tif"
-    timestamps, frames, _, _ = load_series(path, ax, False)
+    timestamps, frames, _, _, _ = load_series(path, ax, False)
 
     interval = np.diff(timestamps).mean() / 1000 / 1000 / 1000
     intervals = np.diff(timestamps) / 1000 / 1000 / 1000

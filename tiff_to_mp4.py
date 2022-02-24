@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # path = "data/image_2022-02-15T15-37-09.663_0.tif"
     # path = "data/image_2022-02-15T15-37-36.853_0.tif"
     path = "data/old/image_2022-02-17T12-13-05.09_0.tif"
-    timestamps, frames, x, y = load_series(path, ax, True)
+    timestamps, frames, x, y, _ = load_series(path, ax, True)
     frame_rate = get_frame_rate(timestamps)
     timestamps, frames = fill_dropped_frames(timestamps, frames)
     print(f"{frame_rate=:.2f} s, time: {(len(timestamps) - 1) / frame_rate:.2f} s")

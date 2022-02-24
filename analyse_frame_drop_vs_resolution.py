@@ -16,7 +16,7 @@ if __name__ == "__main__":
     resolution = []
     for path in paths:
         path = dir_path + path
-        timestamps, frames, x, y = load_series(path, False)
+        timestamps, frames, x, y, _ = load_series(path, False)
         intervals = np.diff(timestamps) / 1000 / 1000 / 1000
         intervals = np.round(intervals, 4)
         min_interval = intervals.min()
