@@ -1,3 +1,5 @@
+import os
+
 from tiff_handler import load_series, get_frame_rate, plot_framedrops, plot_frame_hist
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,18 +13,24 @@ def linear_func(x, m, b):
 if __name__ == "__main__":
     paths = ["data/old/image_2022-02-17T12-13-05.09_0.tif", "data/old/image_2022-02-15T15-36-26.04_0.tif",
              "data/old/image_2022-02-15T15-37-09.663_0.tif", "data/old/image_2022-02-15T15-37-36.853_0.tif"]
-    dir_path = "data/"
-    paths = ['image_2022-02-17T14-23-05.649_0.tif', 'image_2022-02-17T14-25-27.857_0.tif',
-             'image_2022-02-17T14-27-20.301_0.tif', 'image_2022-02-17T14-26-14.757_0.tif',
-             'image_2022-02-17T14-24-19.375_0.tif', 'image_2022-02-17T14-28-21.007_0.tif',
-             'image_2022-02-17T14-27-43.767_0.tif', 'image_2022-02-17T14-24-54.559_0.tif',
-             'image_2022-02-17T14-22-01.668_0.tif', 'image_2022-02-17T14-26-46.5_0.tif',
-             'image_2022-02-17T14-23-46.949_0.tif', 'image_2022-02-17T16-29-49.706_0.tif']
+    paths = ['data/image_2022-02-17T14-23-05.649_0.tif', 'data/image_2022-02-17T14-25-27.857_0.tif',
+             'data/image_2022-02-17T14-27-20.301_0.tif', 'data/image_2022-02-17T14-26-14.757_0.tif',
+             'data/image_2022-02-17T14-24-19.375_0.tif', 'data/image_2022-02-17T14-28-21.007_0.tif',
+             'data/image_2022-02-17T14-27-43.767_0.tif', 'data/image_2022-02-17T14-24-54.559_0.tif',
+             'data/image_2022-02-17T14-22-01.668_0.tif', 'data/image_2022-02-17T14-26-46.5_0.tif',
+             'data/image_2022-02-17T14-23-46.949_0.tif', 'data/image_2022-02-17T16-29-49.706_0.tif',
+             '/Volumes/NO NAME/image_2022-02-25T11-32-20.699_0.tif',
+             '/Volumes/NO NAME/image_2022-02-25T11-32-56.846_0.tif',
+             '/Volumes/NO NAME/image_2022-02-25T11-33-19.668_0.tif',
+             '/Volumes/NO NAME/image_2022-02-25T11-33-59.474_0.tif',
+             '/Volumes/NO NAME/image_2022-02-25T11-34-23.609_0.tif',
+             '/Volumes/NO NAME/image_2022-02-25T11-34-46.719_0.tif',
+             '/Volumes/NO NAME/image_2022-02-25T11-35-14.675_0.tif',
+             '/Volumes/NO NAME/image_2022-02-25T11-35-34.924_0.tif']
 
     resolution = []
     file_sizes = []
     for path in paths:
-        path = dir_path + path
         timestamps, frames, x, y, file_size = load_series(path, False)
         intervals = np.diff(timestamps) / 1000 / 1000 / 1000
         intervals = np.round(intervals, 4)
