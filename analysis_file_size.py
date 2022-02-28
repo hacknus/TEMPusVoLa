@@ -11,26 +11,21 @@ def linear_func(x, m, b):
 
 
 if __name__ == "__main__":
-    paths = ["data/old/image_2022-02-17T12-13-05.09_0.tif", "data/old/image_2022-02-15T15-36-26.04_0.tif",
-             "data/old/image_2022-02-15T15-37-09.663_0.tif", "data/old/image_2022-02-15T15-37-36.853_0.tif"]
-    paths = ['data/image_2022-02-17T14-23-05.649_0.tif', 'data/image_2022-02-17T14-25-27.857_0.tif',
-             'data/image_2022-02-17T14-27-20.301_0.tif', 'data/image_2022-02-17T14-26-14.757_0.tif',
-             'data/image_2022-02-17T14-24-19.375_0.tif', 'data/image_2022-02-17T14-28-21.007_0.tif',
-             'data/image_2022-02-17T14-27-43.767_0.tif', 'data/image_2022-02-17T14-24-54.559_0.tif',
-             'data/image_2022-02-17T14-22-01.668_0.tif', 'data/image_2022-02-17T14-26-46.5_0.tif',
-             'data/image_2022-02-17T14-23-46.949_0.tif', 'data/image_2022-02-17T16-29-49.706_0.tif',
-             '/Volumes/NO NAME/image_2022-02-25T11-32-20.699_0.tif',
-             '/Volumes/NO NAME/image_2022-02-25T11-32-56.846_0.tif',
-             '/Volumes/NO NAME/image_2022-02-25T11-33-19.668_0.tif',
-             '/Volumes/NO NAME/image_2022-02-25T11-33-59.474_0.tif',
-             '/Volumes/NO NAME/image_2022-02-25T11-34-23.609_0.tif',
-             '/Volumes/NO NAME/image_2022-02-25T11-34-46.719_0.tif',
-             '/Volumes/NO NAME/image_2022-02-25T11-35-14.675_0.tif',
-             '/Volumes/NO NAME/image_2022-02-25T11-35-34.924_0.tif']
-
-    resolution = []
-    file_sizes = []
-    for path in paths:
+    path_internal = '/Volumes/Thor SSD/TestDataInternal'
+    path_external = '/Volumes/Thor SSD/TestDataExternal'
+    paths_internal = []
+    paths_external = []
+    for path in os.listdir(path_internal):
+        if path[-5:] == "0.tif":
+            paths_internal.append(path_internal + "/" + path)
+    for path in os.listdir(path_external):
+        if path[-5:] == "0.tif":
+            paths_external.append(path_external + "/" + path)
+    file_sizes_external = []
+    resolution_external = []
+    file_sizes_internal = []
+    resolution_internal = []
+    for path in paths_external:
         timestamps, frames, x, y, file_size = load_series(path, False)
         intervals = np.diff(timestamps) / 1000 / 1000 / 1000
         intervals = np.round(intervals, 4)
@@ -38,17 +33,35 @@ if __name__ == "__main__":
         frame_rate = get_frame_rate(timestamps)
         size = x[0] * y[0] / 1e6
         print(f"{x[0]}x{y[0]}, {size} MP")
-        resolution.append(size)
+        resolution_external.append(size)
         t = len(frames) / frame_rate
         t = (timestamps[-1] - timestamps[0]) / 1000 / 1000 / 1000
-        file_sizes.append(file_size / 1e9 / t)
+        file_sizes_external.append(file_size / 1e9 / t)
         print(f"framerate: {frame_rate:.2f} fps")
-    resolution = np.array(resolution)
-    file_sizes = np.array(file_sizes)
-    popt, _ = curve_fit(linear_func, resolution[resolution < 11.5], file_sizes[resolution < 11.5])
-    max_size_per_second = np.mean(file_sizes[resolution > 11.5])
-    plt.scatter(resolution, file_sizes, color="black", label="TIF")
-    r = np.linspace(min(resolution), max(resolution), 100)
+    resolution_external = np.array(resolution_external)
+    file_sizes_external = np.array(file_sizes_external)
+    for path in paths_internal:
+        timestamps, frames, x, y, file_size = load_series(path, False)
+        intervals = np.diff(timestamps) / 1000 / 1000 / 1000
+        intervals = np.round(intervals, 4)
+        min_interval = intervals.min()
+        frame_rate = get_frame_rate(timestamps)
+        size = x[0] * y[0] / 1e6
+        print(f"{x[0]}x{y[0]}, {size} MP")
+        resolution_internal.append(size)
+        t = len(frames) / frame_rate
+        t = (timestamps[-1] - timestamps[0]) / 1000 / 1000 / 1000
+        file_sizes_internal.append(file_size / 1e9 / t)
+        print(f"framerate: {frame_rate:.2f} fps")
+    resolution_external = np.array(resolution_external)
+    file_sizes_external = np.array(file_sizes_external)
+    res_threshold = 10
+    popt, _ = curve_fit(linear_func, resolution_external[resolution_external < res_threshold],
+                        file_sizes_external[resolution_external < res_threshold])
+    max_size_per_second = np.mean(file_sizes_external[resolution_external > res_threshold])
+    plt.scatter(resolution_external, file_sizes_external, color="black", label="TIF")
+    plt.scatter(resolution_internal, file_sizes_internal, color="red", label="TIF")
+    r = np.linspace(min(resolution_external), max(resolution_external), 100)
     plt.plot(r, linear_func(r, *popt), color="red", ls="--")
     plt.axhline(max_size_per_second, color="orange", ls="--")
     print(f"file size = {popt[0]:.2f} GB per second per resolution")
